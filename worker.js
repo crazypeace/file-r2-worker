@@ -12,11 +12,6 @@ const config = {
   system_type: "shorturl", // 系统的功能定义 // shorturl, imghost, other types {pastebin, journal}
 }
 
-// key in protect_keylist can't read, add, del from UI and API
-const protect_keylist = [
-  "password",
-]
-
 // ====== R2 S3 API 配置 (文件保管站 file-r2 模式) ======
 // 以下变量推荐通过 Cloudflare 面板的环境变量(Variables)/加密机密(Secrets)注入, 作为全局变量自动可用
 // 注意: 面板中的变量名必须与代码完全一致(注意大小写敏感)
