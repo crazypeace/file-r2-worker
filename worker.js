@@ -173,13 +173,6 @@ async function handleRequest(request) {
 
       let stat, random_key
       if (config.custom_link && (req_key != "")) {
-        // Refuse 'password" as Custom shortURL
-        if (protect_keylist.includes(req_key)) {
-          return new Response(`{"status":500,"key": "` + req_key + `", "error":"Error: Key in protect_keylist."}`, {
-            headers: response_header,
-          })
-        }
-
         let is_exist = await is_url_exist(req_key)
         if ((!config.overwrite_kv) && (is_exist)) {
           return new Response(`{"status":500,"key": "` + req_key + `", "error":"Error: Specific key existed."}`, {
@@ -215,13 +208,6 @@ async function handleRequest(request) {
         })
       }
     } else if (req_cmd == "del") {
-      // Refuse to delete 'password' entry
-      if (protect_keylist.includes(req_key)) {
-        return new Response(`{"status":500, "key": "` + req_key + `", "error":"Error: Key in protect_keylist."}`, {
-          headers: response_header,
-        })
-      }
-
       await LINKS.delete(req_key)
       
       // 计数功能打开的话, 要把计数的那条KV也删掉 Remove the visit times record
@@ -233,13 +219,6 @@ async function handleRequest(request) {
         headers: response_header,
       })
     } else if (req_cmd == "qry") {
-      // Refuse to query 'password'
-      if (protect_keylist.includes(req_key)) {
-        return new Response(`{"status":500,"key": "` + req_key + `", "error":"Error: Key in protect_keylist."}`, {
-          headers: response_header,
-        })
-      }
-
       let value = await LINKS.get(req_key)
       if (value != null) {
         let jsonObjectRetrun = JSON.parse(`{"status":200, "error":"", "key":"", "url":""}`);
@@ -267,10 +246,6 @@ async function handleRequest(request) {
                 
         for (var i = 0; i < keyList.keys.length; i++) {
           let item = keyList.keys[i];
-          // Hide 'password' from the query all result
-          if (protect_keylist.includes(item.name)) {
-            continue;
-          }
           // Hide '-count' from the query all result
           if (item.name.endsWith("-count")) {
             continue;
@@ -342,12 +317,6 @@ async function handleRequest(request) {
   // Query the value(long url) in KV by key(short url)
   let value = await LINKS.get(path);
   // console.log(value)
-
-  // 如果path是'password', 让查询结果为空, 不然直接就把password查出来了
-  // Protect password. If path equals 'password', set result null
-  if (protect_keylist.includes(path)) {
-    value = ""
-  }
 
   if (!value) {
     // KV中没有数据, 返回404
