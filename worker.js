@@ -29,8 +29,8 @@ const protect_keylist = [
 // S3 签名 + presigned URL 已移至前端 r2-s3.js
 // Worker 仅负责注入 R2 配置占位符 + KV 读写
 
-let index_html = "https://crazypeace.github.io/Url-Shorten-Worker/" + config.theme + "/index.html"
-let result_html = "https://crazypeace.github.io/Url-Shorten-Worker/" + config.theme + "/result.html"
+let index_html = "https://crazypeace.github.io/file-r2-worker/" + config.theme + "/index.html"
+let result_html = "https://crazypeace.github.io/file-r2-worker/" + config.theme + "/result.html"
 
 const html404 = `<!DOCTYPE html>
   <html>
