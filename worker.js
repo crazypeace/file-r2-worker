@@ -18,7 +18,7 @@ const config = {
 //   R2_BUCKET_NAME       = "" // - R2 存储桶名称 (明文变量)
 //   R2_PUBLIC_URL        = "" // - R2 公开访问 URL, 如 https://pub-xxxx.r2.dev (明文变量)
 
-let index_html = "https://crazypeace.github.io/file-r2-worker/" + config.theme + "/index.html"
+let index_html = "https://crazypeace.github.io/file-r2-worker/index.html"
 let result_html = "https://crazypeace.github.io/file-r2-worker/" + config.theme + "/result.html"
 
 const html404 = `<!DOCTYPE html>
