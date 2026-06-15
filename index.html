@@ -4,44 +4,66 @@
   <meta http-equiv="content-type" content="txt/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <title>Shorter URL</title>
+  <title>File Hosting (R2)</title>
   <link rel="stylesheet" href="https://crazypeace.github.io/Url-Shorten-Worker/styles.css">
-  <!-- 如果使用CDN资源就放开这一句, 把上面那一句注释掉
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/crazypeace/Url-Shorten-Worker/styles.css">
-  -->
 </head>
 <body>
   <div class="d-flex align-items-start flex-wrap">
+
+  <!-- 1. 文件选择 + 上传 -->
   <div class="card shadow m-3">
-    <h5 class="card-header">A URL Shortener created using free Cloudflare worker and KV</h5>
+    <h5 class="card-header">选择文件并上传到 R2</h5>
     <div class="card-body">
-      <h5 class="card-title"> </h5>
+      <div class="mb-3">
+        <label for="input_file" class="form-label">选择文件</label>
+        <input class="form-control" type="file" id="input_file">
+      </div>
 
+      <div class="mb-3">
+        <button class="btn btn-warning" type="button" onclick='uploadToR2()' id="uploadBtn" disabled>上传到 R2</button>
+      </div>
+
+      <!-- 上传进度条 -->
+      <div class="mb-3" id="progressWrap" style="display:none;">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" style="width: 0%">0%</div>
+        </div>
+        <small class="text-muted mt-1" id="progressText"></small>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 保存到 KV (隐藏, 仅保留隐藏字段供 JS 读取) -->
+  <div class="card shadow m-3" style="display:none;">
+    <h5 class="card-header">文件保管站 File Hosting (R2)</h5>
+    <div class="card-body">
       <div class="input-group mb-3">
-
-          <span class="input-group-text" id="basic-addon1">Long URL</span>
-
-        <input type="text" class="form-control" id="longURL" aria-describedby="basic-addon1" placeholder="Example: https://example.com/" oninput="loadUrlList()">
+        <div class="form-floating mb-3">
+          <textarea class="form-control" placeholder="" id="longURL" oninput="loadUrlList()"></textarea>
+          <label for="longURL">R2 URL（上传后自动填入）</label>
+        </div>
       </div>
 
       <div class="input-group mb-3">
-
-          <span class="input-group-text" id="basic-addon2">Custom Short URL</span>
-
-        <input type="text" class="form-control" id="keyPhrase" aria-describedby="basic-addon2" placeholder="As you wish">
+        <span class="input-group-text" id="basic-addon2">文件名</span>
+        <input type="text" class="form-control" id="keyPhrase" aria-describedby="basic-addon2" placeholder="上传后自动填入">
       </div>
 
       <div class="input-group mb-3">
-        <button class="btn btn-primary" type="button" onclick='shorturl()' id="addBtn">Shorten it</button>
+        <button class="btn btn-primary" type="button" onclick='shorturl()' id="addBtn">保存</button>
       </div>
 
       <div class="input-group mb-3">
-
-          <span class="input-group-text" id="basic-addon3">password</span>
-
+        <span class="input-group-text" id="basic-addon3">本系统密码</span>
         <input class="form-control" type="text" value="__PASSWORD__" readonly="true" id="passwordText" aria-describedby="basic-addon3">
       </div>
 
+      <!-- R2 S3 配置 (由 Worker 注入真实值, 隐藏) -->
+      <input type="hidden" id="r2AccountId"       value="__R2_ACCOUNT_ID__">
+      <input type="hidden" id="r2AccessKeyId"      value="__R2_ACCESS_KEY_ID__">
+      <input type="hidden" id="r2SecretAccessKey"  value="__R2_SECRET_ACCESS_KEY__">
+      <input type="hidden" id="r2BucketName"       value="__R2_BUCKET_NAME__">
+      <input type="hidden" id="r2PublicUrl"        value="__R2_PUBLIC_URL__">
     </div>
     
     <div class="card-footer">
@@ -49,10 +71,10 @@
     </div>
   </div>
 
+  <!-- 3. LocalStorage List -->
   <div class="card shadow m-3">
     <h5 class="card-header">LocalStorage List</h5>
     <div class="card-body">
-      <h5 class="card-title"> </h5>
       <div class="input-group mb-3">
         <button class="btn btn-success" type="button" onclick='loadUrlList()' id="loadListBtn">load localStorage</button>
         <button class="btn btn-danger" type="button" onclick='clearLocalStorage()' id="clearlocalStgBtn">clear localStorage</button>
@@ -75,8 +97,108 @@
       </div>
     </div>
   </div>
+
+  <!-- 4. S3/ShareX 配置指南 (折叠面板, 放在底部) -->
+  <div class="card shadow m-3" style="max-width:768px;">
+    <h5 class="card-header d-flex justify-content-between align-items-center" 
+        data-bs-toggle="collapse" data-bs-target="#s3Guide" role="button" 
+        aria-expanded="false" aria-controls="#s3Guide" style="cursor:pointer;">
+      📤 ShareX S3 上传器配置指南
+      <span class="badge bg-secondary">展开查看</span>
+    </h5>
+    <div class="collapse" id="s3Guide">
+      <div class="card-body" style="font-size:0.92rem;">
+        <p class="text-muted mb-2">在 ShareX 中选择 <b>File uploaders → Amazon S3</b>，按如下参数填写：</p>
+
+        <!-- 基本配置 -->
+        <div class="rounded bg-light p-2 mb-2 fw-bold">🔑 基本配置</div>
+
+        <table class="table table-sm table-borderless mb-2" style="margin-bottom:0.5rem;">
+          <tr>
+            <td style="width:180px;font-weight:600;white-space:nowrap;">Access key ID</td>
+            <td><code id="g-r2AccessKeyId">__R2_ACCESS_KEY_ID__</code></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Secret access key</td>
+            <td><code>••••••••（填入你的 Secret Key）</code></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Endpoints</td>
+            <td><span class="text-danger">（下拉框留空）</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Endpoint</td>
+            <td><code id="g-r2Endpoint">https://__R2_ACCOUNT_ID__.r2.cloudflarestorage.com</code></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Region</td>
+            <td><code>auto</code></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Bucket name</td>
+            <td><code id="g-r2BucketName">__R2_BUCKET_NAME__</code></td>
+          </tr>
+        </table>
+
+        <!-- 路径与域名 -->
+        <div class="rounded bg-light p-2 mb-2 fw-bold">🌐 路径与域名</div>
+
+        <table class="table table-sm table-borderless mb-2" style="margin-bottom:0.5rem;">
+          <tr>
+            <td style="width:180px;font-weight:600;white-space:nowrap;">Upload path</td>
+            <td><span class="text-danger">（留空 = 根目录）</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Use custom domain</td>
+            <td><span class="badge bg-success">✓ 勾选</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">&emsp;Custom domain</td>
+            <td><code id="g-r2PublicUrl">__R2_PUBLIC_URL__</code></td>
+          </tr>
+        </table>
+
+        <!-- 高级选项 -->
+        <div class="rounded bg-light p-2 mb-2 fw-bold">⚙️ Advanced</div>
+
+        <table class="table table-sm table-borderless mb-0">
+          <tr>
+            <td style="width:180px;font-weight:600;white-space:nowrap;">Storage class</td>
+            <td><code>Amazon S3 Standard</code></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Signed payload</td>
+            <td><span class="badge bg-danger">✗ 不勾选</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Set public-read ACL</td>
+            <td><span class="badge bg-danger">✗ 不勾选</span> <small class="text-muted">R2 不支持 ACL</small></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Use path style request</td>
+            <td><span class="badge bg-danger">✗ 不勾选</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Remove file extension on</td>
+            <td>
+              <span class="badge bg-danger">✗ Image</span>
+              <span class="badge bg-danger">✗ Video</span>
+              <span class="badge bg-danger">✗ Text</span>
+            </td>
+          </tr>
+        </table>
+
+        <div class="mt-3 p-2 rounded" style="background:#e8f5e9;font-size:0.85rem;">
+          💡 <b>预览 URL 示例：</b>
+          <code id="g-r2Preview">__R2_PUBLIC_URL__/example.png</code>
+        </div>
+      </div>
+    </div>
   </div>
 
+  </div>
+
+  <!-- Result Modal -->
   <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -92,14 +214,75 @@
       </div>
     </div>
   </div>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/gh/lrsjng/jquery-qrcode@0.18.0/dist/jquery-qrcode.min.js" crossorigin="anonymous"></script>
 
   <script src="https://crazypeace.github.io/Url-Shorten-Worker/main.js" crossorigin="anonymous"></script>
-  <!-- 如果使用CDN资源就放开这一句, 把上面那一句注释掉
-    <script src="https://cdn.jsdelivr.net/gh/crazypeace/Url-Shorten-Worker/main.js" crossorigin="anonymous"></script>
-  -->
+
+  <script>
+    // 覆盖 buildValueItemFunc: 缩略图 512px, 不判断文件类型, 失败就失败
+    // 用户需在 R2 自定义域名上开启 Image Transformations
+    // 函数的定义在 main.js 中
+    (function() {
+      var IMG_MAX = 512;
+
+      function thumbUrl(r2Url) {
+        try {
+          var u = new URL(r2Url);
+          return u.origin + "/cdn-cgi/image/width=" + IMG_MAX + ",quality=75,format=auto" + u.pathname;
+        } catch(e) {
+          return r2Url;
+        }
+      }
+
+      buildValueItemFunc = function(longUrl) {
+        var wrap = document.createElement('div');
+        wrap.classList.add("form-control", "rounded-top-0");
+
+        var img = document.createElement('img');
+        img.src = thumbUrl(longUrl);
+        img.style.cssText = "max-width:" + IMG_MAX + "px;max-height:" + IMG_MAX + "px;border-radius:6px;cursor:pointer;display:block;";
+        img.title = '点击查看原图';
+        img.onerror = function() { img.remove(); };
+        img.onclick = function() { window.open(longUrl, '_blank'); };
+        wrap.appendChild(img);
+
+        var txt = document.createElement('small');
+        txt.style.cssText = 'word-break:break-all;display:block;margin-top:4px;opacity:0.7;';
+        txt.innerText = longUrl;
+        wrap.appendChild(txt);
+
+        return wrap;
+      };
+    })();
+
+    // S3 配置指南: 用隐藏字段的真实值替换占位符
+    (function() {
+      var map = {
+        '__R2_ACCOUNT_ID__':   'r2AccountId',
+        '__R2_ACCESS_KEY_ID__':'r2AccessKeyId',
+        '__R2_BUCKET_NAME__':  'r2BucketName',
+        '__R2_PUBLIC_URL__':   'r2PublicUrl',
+      };
+      Object.keys(map).forEach(function(placeholder) {
+        var el = document.getElementById(map[placeholder]);
+        var val = el ? el.value : '';
+        if (!val) return;
+        // 替换指南区域中的占位符
+        var guideEl = document.getElementById('s3Guide');
+        if (guideEl) {
+          guideEl.innerHTML = guideEl.innerHTML.split(placeholder).join(val);
+        }
+      });
+      // 特殊处理 Endpoint (拼接 accountId)
+      var accId = document.getElementById('r2AccountId').value;
+      if (accId) {
+        var endpointEl = document.getElementById('g-r2Endpoint');
+        if (endpointEl) endpointEl.innerText = 'https://' + accId + '.r2.cloudflarestorage.com';
+      }
+    })();
+  </script>
 </body>
 </html>
