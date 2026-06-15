@@ -19,7 +19,6 @@ const config = {
 //   R2_PUBLIC_URL        = "" // - R2 公开访问 URL, 如 https://pub-xxxx.r2.dev (明文变量)
 
 let index_html = "https://crazypeace.github.io/file-r2-worker/index.html"
-let result_html = "https://crazypeace.github.io/file-r2-worker/" + config.theme + "/result.html"
 
 const html404 = `<!DOCTYPE html>
   <html>
@@ -64,21 +63,6 @@ async function randomString(len) {
     result += chars.charAt(Math.floor(Math.random() * maxPos));
   }
   return result;
-}
-
-async function sha512(url) {
-  url = new TextEncoder().encode(url)
-
-  const url_digest = await crypto.subtle.digest(
-    {
-      name: "SHA-512",
-    },
-    url, // The data you want to hash as an ArrayBuffer
-  )
-  const hashArray = Array.from(new Uint8Array(url_digest)); // convert buffer to byte array
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  //console.log(hashHex)
-  return hashHex
 }
 
 async function checkURL(URL) {
@@ -168,28 +152,9 @@ async function handleRequest(request) {
       }
 
       let stat, random_key
-      if (config.custom_link && (req_key != "")) {
-        let is_exist = await is_url_exist(req_key)
-        if ((!config.overwrite_kv) && (is_exist)) {
-          return new Response(`{"status":500,"key": "` + req_key + `", "error":"Error: Specific key existed."}`, {
-            headers: response_header,
-          })
-        } else {
-          random_key = req_key
-          stat, await LINKS.put(req_key, req_url)
-        }
-      } else if (config.unique_link) {
-        let url_sha512 = await sha512(req_url)
-        let url_key = await is_url_exist(url_sha512)
-        if (url_key) {
-          random_key = url_key
-        } else {
-          stat, random_key = await save_url(req_url)
-          if (typeof (stat) == "undefined") {
-            await LINKS.put(url_sha512, random_key)
-            // console.log()
-          }
-        }
+      if (req_key != "") {
+        random_key = req_key
+        stat, await LINKS.put(req_key, req_url)
       } else {
         stat, random_key = await save_url(req_url)
       }
@@ -348,17 +313,6 @@ async function handleRequest(request) {
     value = value + params
   }
 
-  // 如果自定义了结果页面
-  if (config.result_page) {
-    let result_page_html = await fetch(result_html)
-    let result_page_html_text = await result_page_html.text()      
-    result_page_html_text = result_page_html_text.replace(/{__FINAL_LINK__}/gm, value)
-    return new Response(result_page_html_text, {
-      headers: response_header,
-    })
-  } 
-
-  // 以下是不使用自定义结果页面的处理
   // 作为一个短链系统, 需要跳转
   if (config.system_type == "shorturl") {
     return Response.redirect(value, 302)
