@@ -108,85 +108,104 @@
     </h5>
     <div class="collapse" id="s3Guide">
       <div class="card-body" style="font-size:0.92rem;">
-        <p class="text-muted mb-2">在 ShareX 中选择 <b>File uploaders → Amazon S3</b>，按如下参数填写：</p>
+        <p class="text-muted mb-3">在 ShareX 中选择 <b>File uploaders → Amazon S3</b>，按如下参数填写：</p>
 
-        <!-- 基本配置 -->
-        <div class="rounded bg-light p-2 mb-2 fw-bold">🔑 基本配置</div>
+        <!-- Access key ID -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Access key ID:</label>
+          <input type="text" class="form-control" readonly id="g-r2AccessKeyId" value="__R2_ACCESS_KEY_ID__">
+        </div>
 
-        <table class="table table-sm table-borderless mb-2" style="margin-bottom:0.5rem;">
-          <tr>
-            <td style="width:180px;font-weight:600;white-space:nowrap;">Access key ID</td>
-            <td><code id="g-r2AccessKeyId">__R2_ACCESS_KEY_ID__</code></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Secret access key</td>
-            <td><code id="g-r2SecretAccessKey">__R2_SECRET_ACCESS_KEY__</code></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Endpoints</td>
-            <td><span class="text-danger">（下拉框留空）</span></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Endpoint</td>
-            <td><code id="g-r2Endpoint">https://__R2_ACCOUNT_ID__.r2.cloudflarestorage.com</code></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Region</td>
-            <td><code>auto</code></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Bucket name</td>
-            <td><code id="g-r2BucketName">__R2_BUCKET_NAME__</code></td>
-          </tr>
-        </table>
+        <!-- Secret access key -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Secret access key:</label>
+          <input type="text" class="form-control" readonly id="g-r2SecretAccessKey" value="__R2_SECRET_ACCESS_KEY__">
+        </div>
 
-        <!-- 路径与域名 -->
-        <div class="rounded bg-light p-2 mb-2 fw-bold">🌐 路径与域名</div>
+        <!-- Endpoints -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Endpoints:</label>
+          <input type="text" class="form-control" readonly value="" placeholder="（留空）">
+        </div>
 
-        <table class="table table-sm table-borderless mb-2" style="margin-bottom:0.5rem;">
-          <tr>
-            <td style="width:180px;font-weight:600;white-space:nowrap;">Upload path</td>
-            <td><span class="text-danger">（留空 = 根目录）</span></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Use custom domain</td>
-            <td><span class="badge bg-success">✓ 勾选</span></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">&emsp;Custom domain</td>
-            <td><code id="g-r2PublicUrl">__R2_PUBLIC_URL__</code></td>
-          </tr>
-        </table>
+        <!-- Endpoint + Region 并排 -->
+        <div class="row mb-3">
+          <div class="col-md-9">
+            <label class="form-label fw-bold">Endpoint:</label>
+            <input type="text" class="form-control" readonly id="g-r2Endpoint" value="https://__R2_ACCOUNT_ID__.r2.cloudflarestorage.com">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Region:</label>
+            <input type="text" class="form-control" readonly value="auto">
+          </div>
+        </div>
 
-        <!-- 高级选项 -->
-        <div class="rounded bg-light p-2 mb-2 fw-bold">⚙️ Advanced</div>
+        <!-- Bucket name -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Bucket name:</label>
+          <input type="text" class="form-control" readonly id="g-r2BucketName" value="__R2_BUCKET_NAME__">
+        </div>
 
-        <table class="table table-sm table-borderless mb-0">
-          <tr>
-            <td style="width:180px;font-weight:600;white-space:nowrap;">Storage class</td>
-            <td><code>Amazon S3 Standard</code></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Signed payload</td>
-            <td><span class="badge bg-danger">✗ 不勾选</span></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Set public-read ACL</td>
-            <td><span class="badge bg-danger">✗ 不勾选</span> <small class="text-muted">R2 不支持 ACL</small></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Use path style request</td>
-            <td><span class="badge bg-danger">✗ 不勾选</span></td>
-          </tr>
-          <tr>
-            <td style="font-weight:600;">Remove file extension on</td>
-            <td>
-              <span class="badge bg-danger">✗ Image</span>
-              <span class="badge bg-danger">✗ Video</span>
-              <span class="badge bg-danger">✗ Text</span>
-            </td>
-          </tr>
-        </table>
+        <!-- Upload path -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Upload path:</label>
+          <input type="text" class="form-control" readonly value="" placeholder="（留空 = 根目录）">
+        </div>
+
+        <!-- Use custom domain -->
+        <div class="mb-3">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" checked disabled id="checkCustomDomain">
+            <label class="form-check-label fw-bold" for="checkCustomDomain">Use custom domain:</label>
+          </div>
+          <input type="text" class="form-control" readonly id="g-r2PublicUrl" value="__R2_PUBLIC_URL__">
+        </div>
+
+        <!-- Advanced -->
+        <div class="rounded bg-light p-2 mb-3 fw-bold">Advanced</div>
+
+        <!-- Storage class -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Storage class:</label>
+          <input type="text" class="form-control" readonly value="Amazon S3 Standard">
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="mb-2">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" disabled id="checkSigned">
+            <label class="form-check-label" for="checkSigned">Signed payload</label>
+          </div>
+        </div>
+        <div class="mb-2">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" disabled id="checkACL">
+            <label class="form-check-label" for="checkACL">Set public-read ACL on file</label>
+          </div>
+        </div>
+        <div class="mb-2">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" disabled id="checkPathStyle">
+            <label class="form-check-label" for="checkPathStyle">Use path style request</label>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Remove file extension on:</label>
+          <div class="d-flex gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" disabled id="checkExtImg">
+              <label class="form-check-label" for="checkExtImg">Image</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" disabled id="checkExtVid">
+              <label class="form-check-label" for="checkExtVid">Video</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" disabled id="checkExtTxt">
+              <label class="form-check-label" for="checkExtTxt">Text</label>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
