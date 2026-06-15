@@ -120,7 +120,7 @@
           </tr>
           <tr>
             <td style="font-weight:600;">Secret access key</td>
-            <td><code>••••••••（填入你的 Secret Key）</code></td>
+            <td><code id="g-r2SecretAccessKey">__R2_SECRET_ACCESS_KEY__</code></td>
           </tr>
           <tr>
             <td style="font-weight:600;">Endpoints</td>
@@ -261,10 +261,11 @@
     // S3 配置指南: 用隐藏字段的真实值替换占位符
     (function() {
       var map = {
-        '__R2_ACCOUNT_ID__':   'r2AccountId',
-        '__R2_ACCESS_KEY_ID__':'r2AccessKeyId',
-        '__R2_BUCKET_NAME__':  'r2BucketName',
-        '__R2_PUBLIC_URL__':   'r2PublicUrl',
+        '__R2_ACCOUNT_ID__':      'r2AccountId',
+        '__R2_ACCESS_KEY_ID__':   'r2AccessKeyId',
+        '__R2_SECRET_ACCESS_KEY__':'r2SecretAccessKey',
+        '__R2_BUCKET_NAME__':     'r2BucketName',
+        '__R2_PUBLIC_URL__':      'r2PublicUrl',
       };
       Object.keys(map).forEach(function(placeholder) {
         var el = document.getElementById(map[placeholder]);
