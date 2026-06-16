@@ -23,6 +23,18 @@
         <button class="btn btn-warning" type="button" onclick='uploadToR2()' id="uploadBtn" disabled>上传到 R2</button>
       </div>
 
+      <!-- R2 S3 配置 (由 Worker 注入真实值, 隐藏) -->
+      <input type="hidden" id="r2AccountId"       value="__R2_ACCOUNT_ID__">
+      <input type="hidden" id="r2AccessKeyId"      value="__R2_ACCESS_KEY_ID__">
+      <input type="hidden" id="r2SecretAccessKey"  value="__R2_SECRET_ACCESS_KEY__">
+      <input type="hidden" id="r2BucketName"       value="__R2_BUCKET_NAME__">
+      <input type="hidden" id="r2PublicUrl"        value="__R2_PUBLIC_URL__">
+
+      <!-- 隐藏字段, 仅供 JS 读取 -->
+      <input type="hidden" id="longURL" value="">
+      <input type="hidden" id="keyPhrase" value="">
+      <input type="hidden" id="passwordText" value="__PASSWORD__">
+
       <!-- 上传进度条 -->
       <div class="mb-3" id="progressWrap" style="display:none;">
         <div class="progress">
@@ -156,41 +168,6 @@
         </div>
 
       </div>
-    </div>
-  </div>
-
-
-  <!-- 2. 保存到 KV (隐藏, 仅保留隐藏字段供 JS 读取) -->
-  <div class="card shadow m-3" style="display:none;">
-    <h5 class="card-header">文件保管站 File Hosting (R2)</h5>
-    <div class="card-body">
-      <div class="input-group mb-3">
-        <div class="form-floating mb-3">
-          <textarea class="form-control" placeholder="" id="longURL" oninput="loadUrlList()"></textarea>
-          <label for="longURL">R2 URL（上传后自动填入）</label>
-        </div>
-      </div>
-
-      <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon2">文件名</span>
-        <input type="text" class="form-control" id="keyPhrase" aria-describedby="basic-addon2" placeholder="上传后自动填入">
-      </div>
-
-      <div class="input-group mb-3">
-        <button class="btn btn-primary" type="button" onclick='shorturl()' id="addBtn">保存</button>
-      </div>
-
-      <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon3">本系统密码</span>
-        <input class="form-control" type="text" value="__PASSWORD__" readonly="true" id="passwordText" aria-describedby="basic-addon3">
-      </div>
-
-      <!-- R2 S3 配置 (由 Worker 注入真实值, 隐藏) -->
-      <input type="hidden" id="r2AccountId"       value="__R2_ACCOUNT_ID__">
-      <input type="hidden" id="r2AccessKeyId"      value="__R2_ACCESS_KEY_ID__">
-      <input type="hidden" id="r2SecretAccessKey"  value="__R2_SECRET_ACCESS_KEY__">
-      <input type="hidden" id="r2BucketName"       value="__R2_BUCKET_NAME__">
-      <input type="hidden" id="r2PublicUrl"        value="__R2_PUBLIC_URL__">
     </div>
   </div>
 

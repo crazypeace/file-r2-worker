@@ -19,8 +19,6 @@ function shorturl() {
   // key can't have space in it
   document.getElementById('keyPhrase').value = document.getElementById('keyPhrase').value.replace(/\s/g, "-");
 
-  document.getElementById("addBtn").disabled = true;
-  document.getElementById("addBtn").innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Please wait...';
   fetch(apiSrv, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -29,8 +27,6 @@ function shorturl() {
     return response.json();
   }).then(function (myJson) {
     res = myJson;
-    document.getElementById("addBtn").disabled = false;
-    document.getElementById("addBtn").innerHTML = 'Shorten it';
 
     // 成功生成短链 Succeed
     if (res.status == "200") {
@@ -53,8 +49,6 @@ function shorturl() {
   }).catch(function (err) {
     alert("Unknow error. Please retry!");
     console.log(err);
-    document.getElementById("addBtn").disabled = false;
-    document.getElementById("addBtn").innerHTML = 'Shorten it';
   })
 }
 
@@ -711,7 +705,6 @@ inputFile.addEventListener('change', function() {
     // 重置状态
     document.getElementById('longURL').value = '';
     document.getElementById('keyPhrase').value = '';
-    document.getElementById('addBtn').disabled = true;
   } else {
     uploadBtn.disabled = true;
     uploadBtn.innerText = '上传到 R2';
@@ -813,7 +806,6 @@ function onUploadDone(key, r2Url) {
   // 填入结果
   document.getElementById('longURL').value = r2Url;
   document.getElementById('keyPhrase').value = key;
-  document.getElementById('addBtn').disabled = false;
 
   // 进度条变绿
   const progressBar = document.getElementById('progressBar');
