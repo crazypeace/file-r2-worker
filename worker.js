@@ -13,7 +13,7 @@ const config = {
 // 注意: 面板中的变量名必须与代码完全一致(注意大小写敏感)
 // 偷懒也可以直接在这里赋值
 //   R2_S3_ENDPOINT       = "" // - S3 API 完整 URL, 如 https://xxx.r2.cloudflarestorage.com (优先于 R2_ACCOUNT_ID 拼装)
-//   R2_ACCOUNT_ID        = "" // - R2 账户 ID (明文变量)
+//   R2_ACCOUNT_ID        = "" // - R2 账户 ID (明文变量) (兼容历史版本, 保留)
 //   R2_ACCESS_KEY_ID     = "" // - S3 API Access Key ID (建议设为加密 Secret)
 //   R2_SECRET_ACCESS_KEY = "" // - S3 API Secret Access Key (建议设为加密 Secret)
 //   R2_BUCKET_NAME       = "" // - R2 存储桶名称 (明文变量)
