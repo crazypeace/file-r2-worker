@@ -103,14 +103,7 @@ async function is_url_exist(url_sha512) {
 
 // 系统密码
 async function system_password() {
-  // 配置中的passoword为空 config.password is NULL
-  if (config.password.trim().length === 0 ) {    
-    // 查KV中的password对应的值 Query "password" in KV
-    return await LINKS.get("password");
-  }
-  else {
-    return config.password.trim();
-  }
+  return config.password.trim();
 }
 
 async function handleRequest(request) {
