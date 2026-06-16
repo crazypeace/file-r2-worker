@@ -13,6 +13,7 @@ const config = {
 // 注意: 面板中的变量名必须与代码完全一致(注意大小写敏感)
 // 偷懒也可以直接在这里赋值
 //   R2_ACCOUNT_ID        = "" // - R2 账户 ID (明文变量)
+//   R2_S3_ENDPOINT       = "" // - S3 API 完整 URL, 如 https://xxx.r2.cloudflarestorage.com (优先于 R2_ACCOUNT_ID 拼装)
 //   R2_ACCESS_KEY_ID     = "" // - S3 API Access Key ID (建议设为加密 Secret)
 //   R2_SECRET_ACCESS_KEY = "" // - S3 API Secret Access Key (建议设为加密 Secret)
 //   R2_BUCKET_NAME       = "" // - R2 存储桶名称 (明文变量)
@@ -258,6 +259,7 @@ async function handleRequest(request) {
     index = index.replace(/__PASSWORD__/gm, password_value)
     // 注入 R2 配置 (全局变量)
     index = index.replace(/__R2_ACCOUNT_ID__/gm, (typeof R2_ACCOUNT_ID !== 'undefined') ? R2_ACCOUNT_ID : '')
+    index = index.replace(/__R2_S3_ENDPOINT__/gm, (typeof R2_S3_ENDPOINT !== 'undefined') ? R2_S3_ENDPOINT : '')
     index = index.replace(/__R2_ACCESS_KEY_ID__/gm, (typeof R2_ACCESS_KEY_ID !== 'undefined') ? R2_ACCESS_KEY_ID : '')
     index = index.replace(/__R2_SECRET_ACCESS_KEY__/gm, (typeof R2_SECRET_ACCESS_KEY !== 'undefined') ? R2_SECRET_ACCESS_KEY : '')
     index = index.replace(/__R2_BUCKET_NAME__/gm, (typeof R2_BUCKET_NAME !== 'undefined') ? R2_BUCKET_NAME : '')

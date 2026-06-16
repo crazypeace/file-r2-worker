@@ -497,6 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function getR2Config() {
   return {
     accountId:      document.getElementById('r2AccountId').value,
+    s3Endpoint:     document.getElementById('r2S3Endpoint').value,
     accessKeyId:    document.getElementById('r2AccessKeyId').value,
     secretAccessKey:document.getElementById('r2SecretAccessKey').value,
     bucketName:     document.getElementById('r2BucketName').value,
@@ -539,7 +540,7 @@ function _uriEncode(str, encodeSlash) {
 
 // ====== 签名请求 (通用) ======
 async function _signedFetch(method, path, queryParams, cfg) {
-  const host = cfg.accountId + '.r2.cloudflarestorage.com';
+  const host = cfg.s3Endpoint ? new URL(cfg.s3Endpoint).host : cfg.accountId + '.r2.cloudflarestorage.com';
   const now = new Date();
   const dateStamp = _formatDateStamp(now);
   const amzDate = _formatAmzDate(now);
@@ -608,7 +609,7 @@ async function r2KeyExists(key) {
 async function r2GeneratePresignedPutUrl(key, expiresIn) {
   const cfg = getR2Config();
   expiresIn = expiresIn || 900;
-  const host = cfg.accountId + '.r2.cloudflarestorage.com';
+  const host = cfg.s3Endpoint ? new URL(cfg.s3Endpoint).host : cfg.accountId + '.r2.cloudflarestorage.com';
   const now = new Date();
   const dateStamp = _formatDateStamp(now);
   const amzDate = _formatAmzDate(now);

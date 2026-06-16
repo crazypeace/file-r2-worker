@@ -25,6 +25,7 @@
 
       <!-- R2 S3 配置 (由 Worker 注入真实值, 隐藏) -->
       <input type="hidden" id="r2AccountId"       value="__R2_ACCOUNT_ID__">
+      <input type="hidden" id="r2S3Endpoint"      value="__R2_S3_ENDPOINT__">
       <input type="hidden" id="r2AccessKeyId"      value="__R2_ACCESS_KEY_ID__">
       <input type="hidden" id="r2SecretAccessKey"  value="__R2_SECRET_ACCESS_KEY__">
       <input type="hidden" id="r2BucketName"       value="__R2_BUCKET_NAME__">
@@ -82,7 +83,7 @@
         <div class="row mb-3">
           <div class="col-md-9">
             <label class="form-label fw-bold">Endpoint:</label>
-            <input type="text" class="form-control" readonly id="g-r2Endpoint" value="https://__R2_ACCOUNT_ID__.r2.cloudflarestorage.com">
+            <input type="text" class="form-control" readonly id="g-r2Endpoint" value="__R2_S3_ENDPOINT__">
           </div>
           <div class="col-md-3">
             <label class="form-label fw-bold">Region:</label>
@@ -266,6 +267,7 @@
     (function() {
       var map = {
         '__R2_ACCOUNT_ID__':      'r2AccountId',
+        '__R2_S3_ENDPOINT__':     'r2S3Endpoint',
         '__R2_ACCESS_KEY_ID__':   'r2AccessKeyId',
         '__R2_SECRET_ACCESS_KEY__':'r2SecretAccessKey',
         '__R2_BUCKET_NAME__':     'r2BucketName',
@@ -282,10 +284,11 @@
         }
       });
       // 特殊处理 Endpoint (拼接 accountId)
+      var s3ep = document.getElementById('r2S3Endpoint').value;
       var accId = document.getElementById('r2AccountId').value;
-      if (accId) {
-        var endpointEl = document.getElementById('g-r2Endpoint');
-        if (endpointEl) endpointEl.innerText = 'https://' + accId + '.r2.cloudflarestorage.com';
+      var endpointEl = document.getElementById('g-r2Endpoint');
+      if (endpointEl) {
+        endpointEl.value = s3ep || (accId ? 'https://' + accId + '.r2.cloudflarestorage.com' : '');
       }
     })();
   </script>
