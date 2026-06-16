@@ -2,9 +2,9 @@ const config = {
   password: "", // 管理面板使用密码 // if password != null, then use this config; otherwise, read password from KV.
   cors: true, // 是否允许CORS使用API // Allow Cross-origin resource sharing for API requests.
   overwrite_kv: true, // 允许覆盖已存在的key // Allow user to overwrite an existed key.
-  snapchat_mode: false, // 短链只能访问一次(访问后就删除了) // The link will be distroyed after access.
-  visit_count: false, // 使用记数(会大大增加KV写入的使用量, 多人共用不推荐打开) // Count visit times.
-  load_kv: false, // 从KV加载全部数据(自用推荐打开, 多人共用会看到别人的数据) // Load all from Cloudflare KV
+  snapchat_mode: false, // KV只能访问一次(访问后就删除了) // The link will be distroyed after access.
+  visit_count: false, // 使用记数(会大大增加KV写入的使用量) // Count visit times.
+  load_kv: true, // 从KV加载全部数据(自用推荐打开, 多人共用会看到别人的数据) // Load all from Cloudflare KV
   system_type: "shorturl", // 系统的功能定义 // shorturl, imghost, other types {pastebin, journal}
 }
 
