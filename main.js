@@ -815,8 +815,33 @@ function onUploadDone(key, r2Url) {
 
   uploadBtn.innerText = '上传完成';
 
-  // 自动保存到 KV (等同于用户点击"保存"按钮)
-  shorturl();
+  // 弹窗显示 R2 URL
+  showResult(r2Url);
+
+  // 自动保存到 KV (静默)
+  shorturlSilent();
+}
+
+// ====== 静默保存到 KV (不弹窗) ======
+function shorturlSilent() {
+  if (document.querySelector("#longURL").value == "") return;
+
+  document.getElementById('keyPhrase').value = document.getElementById('keyPhrase').value.replace(/\s/g, "-");
+
+  fetch(apiSrv, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cmd: "add", url: document.querySelector("#longURL").value, key: document.querySelector("#keyPhrase").value, password: password_value })
+  }).then(function (response) {
+    return response.json();
+  }).then(function (myJson) {
+    if (myJson.status == "200") {
+      localStorage.setItem(myJson.key, document.querySelector("#longURL").value);
+      addUrlToList(myJson.key, document.querySelector("#longURL").value);
+    }
+  }).catch(function (err) {
+    console.log(err);
+  });
 }
 
 // ====== 工具函数 ======
