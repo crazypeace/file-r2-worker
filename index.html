@@ -12,8 +12,13 @@
 
   <!-- 1. 文件选择 + 上传 -->
   <div class="card shadow m-3">
-    <h5 class="card-header">选择文件并上传到 R2</h5>
-    <div class="card-body">
+    <h5 class="card-header d-flex justify-content-between align-items-center"
+        data-bs-toggle="collapse" data-bs-target="#uploadPanel" role="button"
+        aria-expanded="false" aria-controls="#uploadPanel" style="cursor:pointer;">
+      选择文件并上传到 R2
+      <span class="badge bg-secondary">展开查看</span>
+    </h5>
+    <div class="card-body collapse" id="uploadPanel">
       <div class="mb-3">
         <label for="input_file" class="form-label">选择文件</label>
         <input class="form-control" type="file" id="input_file">
