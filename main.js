@@ -87,7 +87,7 @@ function addUrlToList(shortUrl, longUrl) {
   // 短链接信息 Short url
   let keyTxt = document.createElement('span')
   keyTxt.classList.add("form-control", "rounded-bottom-0")
-  keyTxt.innerText = window.location.protocol + "//" + window.location.host + "/" + shortUrl
+  keyTxt.innerText = shortUrl
   keyItem.appendChild(keyTxt)
 
   // 显示二维码按钮
