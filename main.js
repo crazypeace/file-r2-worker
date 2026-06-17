@@ -46,24 +46,13 @@ function loadUrlList() {
     urlList.removeChild(urlList.firstChild)
   }
 
-  // 文本框中的长链接
-  let longUrl = document.querySelector("#longURL").value
-  // console.log(longUrl)
-
   // 遍历localStorage
   let len = localStorage.length
-  // console.log(+len)
   for (; len > 0; len--) {
     let keyShortURL = localStorage.key(len - 1)
     let valueLongURL = localStorage.getItem(keyShortURL)
 
-    // 如果长链接为空，加载所有的localStorage
-    // If the long url textbox is empty, load all in localStorage
-    // 如果长链接不为空，加载匹配的localStorage
-    // If the long url textbox is not empty, only load matched item in localStorage
-    if (longUrl == "" || (longUrl == valueLongURL)) {
-      addUrlToList(keyShortURL, valueLongURL)
-    }
+    addUrlToList(keyShortURL, valueLongURL)
   }
 }
 
@@ -504,8 +493,6 @@ inputFile.addEventListener('change', function() {
     uploadBtn.disabled = false;
     uploadBtn.innerText = '上传到 R2: ' + this.files[0].name;
     // 重置状态
-    document.getElementById('longURL').value = '';
-    document.getElementById('keyPhrase').value = '';
   } else {
     uploadBtn.disabled = true;
     uploadBtn.innerText = '上传到 R2';
@@ -604,10 +591,6 @@ function uploadFileToR2(file, uploadUrl) {
 
 // ====== 步骤 3: 上传完成, 填入字段 + 保存到 localStorage ======
 function onUploadDone(key, r2Url) {
-  // 填入结果
-  document.getElementById('longURL').value = r2Url;
-  document.getElementById('keyPhrase').value = key;
-
   // 保存到 localStorage
   localStorage.setItem(key, r2Url);
   addUrlToList(key, r2Url);
