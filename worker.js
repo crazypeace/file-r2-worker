@@ -1,6 +1,5 @@
 const config = {
   password: "", // 管理面板使用密码
-  cors: true, // 是否允许CORS使用API
   load_r2: true, // 允许 load R2 to localStorage 按钮
 }
 
@@ -17,17 +16,8 @@ const config = {
 
 let index_html = "https://crazypeace.github.io/file-r2-worker/index.html"
 
-let response_header = {
+const response_header = {
   "Content-type": "text/html;charset=UTF-8;application/json",
-}
-
-if (config.cors) {
-  response_header = {
-    "Content-type": "text/html;charset=UTF-8;application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST",
-    "Access-Control-Allow-Headers": "Content-Type",
-  }
 }
 
 async function handleRequest(request) {
