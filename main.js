@@ -56,13 +56,23 @@ function loadUrlList() {
     urlList.removeChild(urlList.firstChild)
   }
 
-  // 遍历localStorage (loadR2ToLocalStorage 已按时间倒序写入)
+  // 收集所有条目并按 lastModified 倒序排列 (新文件在前)
+  const entries = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
     if (!k || k === 'password' || k === 'load_r2' || k === 'socks-port' || k === 'http-port') continue;
     const v = localStorage.getItem(k);
-    const { url } = parseStoredValue(v);
-    addUrlToList(k, url);
+    const { url, lastModified } = parseStoredValue(v);
+    entries.push({ key: k, url, lastModified });
+  }
+  entries.sort((a, b) => {
+    if (a.lastModified && b.lastModified) return new Date(b.lastModified) - new Date(a.lastModified);
+    if (a.lastModified) return -1;
+    if (b.lastModified) return 1;
+    return a.key.localeCompare(b.key);
+  });
+  for (const e of entries) {
+    addUrlToList(e.key, e.url);
   }
 }
 
@@ -187,12 +197,7 @@ async function loadR2ToLocalStorage() {
       }
     });
 
-    // 按上传时间倒序 (新文件在前)
-    items.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
-
-    const keys = items.map(i => i.key);
-
-    if (keys.length === 0) {
+    if (items.length === 0) {
       btn.disabled = false;
       btn.innerHTML = 'load R2 to localStorage';
       alert('R2 中没有文件');
@@ -210,9 +215,9 @@ async function loadR2ToLocalStorage() {
     }
     toRemove.forEach(k => localStorage.removeItem(k));
 
-    // 写入 localStorage (按排序后的时间顺序)
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
+    // 写入 localStorage
+    for (let i = 0; i < items.length; i++) {
+      const key = items[i].key;
       const r2Url = cfg.publicUrl + '/' + encodeURIComponent(key);
       localStorage.setItem(key, JSON.stringify({ url: r2Url, lastModified: items[i].lastModified }));
 
