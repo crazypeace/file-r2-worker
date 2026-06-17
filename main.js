@@ -148,7 +148,7 @@ async function deleteShortUrl(delKeyPhrase) {
 // ====== load R2 to localStorage: 列出 R2 全部文件, 写入 localStorage ======
 async function loadR2ToLocalStorage() {
   const cfg = getR2Config();
-  if (!cfg.accountId || !cfg.bucketName) {
+  if ((!cfg.s3Endpoint && !cfg.accountId) || !cfg.bucketName) {
     alert('R2 配置未就绪');
     return;
   }
