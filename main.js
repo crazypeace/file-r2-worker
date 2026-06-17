@@ -204,7 +204,7 @@ async function loadR2ToLocalStorage() {
       return;
     }
 
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 localStorage (0/' + keys.length + ')...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 localStorage (0/' + items.length + ')...';
 
     // 先清理旧的 R2 数据 (保留 socks-port / http-port 等工具 key)
     const preserve = new Set(['socks-port', 'http-port']);
@@ -222,14 +222,14 @@ async function loadR2ToLocalStorage() {
       localStorage.setItem(key, JSON.stringify({ url: r2Url, lastModified: items[i].lastModified }));
 
       // 更新进度
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 localStorage (' + (i + 1) + '/' + keys.length + ')...';
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 localStorage (' + (i + 1) + '/' + items.length + ')...';
     }
 
     btn.disabled = false;
     btn.innerHTML = 'load R2 to localStorage';
     loadUrlList(); // 刷新列表
 
-    document.getElementById("result").innerHTML = 'R2 → localStorage 完成<br>已加载: ' + keys.length + ' 个文件';
+    document.getElementById("result").innerHTML = 'R2 → localStorage 完成<br>已加载: ' + items.length + ' 个文件';
     var modal = new bootstrap.Modal(document.getElementById('resultModal'));
     modal.show();
 
