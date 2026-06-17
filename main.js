@@ -122,21 +122,27 @@ async function deleteShortUrl(delKeyPhrase) {
   document.getElementById("delBtn-" + delKeyPhrase).innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
 
   // 先尝试删除 R2 文件 (file-r2 theme 提供 r2DeleteObject)
+  let r2Failed = false;
   try {
     let longUrl = localStorage.getItem(delKeyPhrase);
     if (longUrl && typeof r2DeleteObject === 'function') {
       let u = new URL(longUrl);
       let key = decodeURIComponent(u.pathname.slice(1)); // "/abc.webp" → "abc.webp"
       if (key) {
-        await r2DeleteObject(key);
+        let ok = await r2DeleteObject(key);
+        if (!ok) r2Failed = true;
       }
     }
   } catch (e) {
     console.log('R2 delete failed:', e);
+    r2Failed = true;
   }
   // 从localStorage中删除
   localStorage.removeItem(delKeyPhrase)
   loadUrlList()
+  if (r2Failed) {
+    alert('⚠️ R2 文件删除失败，仅从列表移除。请手动在 R2 控制台删除。');
+  }
 
   // 按钮恢复
   document.getElementById("delBtn-" + delKeyPhrase).disabled = false;
