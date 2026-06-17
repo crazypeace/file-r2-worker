@@ -39,6 +39,16 @@ function copyurl(id, attr) {
   }
 }
 
+// 解析 localStorage value: 兼容旧格式(纯 URL)和新格式({url, lastModified})
+function parseStoredValue(val) {
+  if (!val) return { url: '', lastModified: '' };
+  try {
+    const obj = JSON.parse(val);
+    if (obj && obj.url) return obj;
+  } catch (e) {}
+  return { url: val, lastModified: '' };
+}
+
 function loadUrlList() {
   // 清空列表
   let urlList = document.querySelector("#urlList")
@@ -46,13 +56,23 @@ function loadUrlList() {
     urlList.removeChild(urlList.firstChild)
   }
 
-  // 遍历localStorage
-  let len = localStorage.length
-  for (; len > 0; len--) {
-    let keyShortURL = localStorage.key(len - 1)
-    let valueLongURL = localStorage.getItem(keyShortURL)
-
-    addUrlToList(keyShortURL, valueLongURL)
+  // 收集所有条目并按 lastModified 倒序排列 (新文件在前)
+  const entries = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    const v = localStorage.getItem(k);
+    if (!k || k === 'password' || k === 'load_r2' || k === 'socks-port' || k === 'http-port') continue;
+    const { url, lastModified } = parseStoredValue(v);
+    entries.push({ key: k, url, lastModified });
+  }
+  entries.sort((a, b) => {
+    if (a.lastModified && b.lastModified) return new Date(b.lastModified) - new Date(a.lastModified);
+    if (a.lastModified) return -1;
+    if (b.lastModified) return 1;
+    return a.key.localeCompare(b.key);
+  });
+  for (const e of entries) {
+    addUrlToList(e.key, e.url);
   }
 }
 
@@ -113,7 +133,8 @@ async function deleteShortUrl(delKeyPhrase) {
   // 先尝试删除 R2 文件 (file-r2 theme 提供 r2DeleteObject)
   let r2Failed = false;
   try {
-    let longUrl = localStorage.getItem(delKeyPhrase);
+    const storedVal = localStorage.getItem(delKeyPhrase);
+    const { url: longUrl } = parseStoredValue(storedVal);
     if (longUrl && typeof r2DeleteObject === 'function') {
       let u = new URL(longUrl);
       let key = decodeURIComponent(u.pathname.slice(1)); // "/abc.webp" → "abc.webp"
@@ -190,11 +211,20 @@ async function loadR2ToLocalStorage() {
 
     btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 localStorage (0/' + keys.length + ')...';
 
-    // 直接写入 localStorage
+    // 先清理旧的 R2 数据 (保留 socks-port / http-port 等工具 key)
+    const preserve = new Set(['socks-port', 'http-port']);
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && !preserve.has(k)) toRemove.push(k);
+    }
+    toRemove.forEach(k => localStorage.removeItem(k));
+
+    // 写入 localStorage (按排序后的时间顺序)
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const r2Url = cfg.publicUrl + '/' + encodeURIComponent(key);
-      localStorage.setItem(key, r2Url);
+      localStorage.setItem(key, JSON.stringify({ url: r2Url, lastModified: items[i].lastModified }));
 
       // 更新进度
       btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 localStorage (' + (i + 1) + '/' + keys.length + ')...';
@@ -599,8 +629,8 @@ function uploadFileToR2(file, uploadUrl) {
 
 // ====== 步骤 3: 上传完成, 填入字段 + 保存到 localStorage ======
 function onUploadDone(key, r2Url) {
-  // 保存到 localStorage
-  localStorage.setItem(key, r2Url);
+  // 保存到 localStorage (带时间戳用于排序)
+  localStorage.setItem(key, JSON.stringify({ url: r2Url, lastModified: new Date().toISOString() }));
   addUrlToList(key, r2Url);
 
   // 进度条变绿
