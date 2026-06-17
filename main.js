@@ -1,56 +1,7 @@
-let res
-
-let apiSrv = window.location.pathname
-let password_value = document.querySelector("#passwordText").value
-// let apiSrv = "https://journal.crazypeace.workers.dev"
-// let password_value = "journaljournal"
-
 // 这是默认行为, 在不同的index.html中可以设置为不同的行为
 // This is default, you can define it to different funciton in different theme index.html
 let buildValueItemFunc = buildValueTxt
 
-function shorturl() {
-  if (document.querySelector("#longURL").value == "") {
-    alert("Url cannot be empty!")
-    return
-  }
-  
-  // 短链中不能有空格
-  // key can't have space in it
-  document.getElementById('keyPhrase').value = document.getElementById('keyPhrase').value.replace(/\s/g, "-");
-
-  fetch(apiSrv, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cmd: "add", url: document.querySelector("#longURL").value, key: document.querySelector("#keyPhrase").value, password: password_value })
-  }).then(function (response) {
-    return response.json();
-  }).then(function (myJson) {
-    res = myJson;
-
-    // 成功生成短链 Succeed
-    if (res.status == "200") {
-      let keyPhrase = res.key;
-      let valueLongURL = document.querySelector("#longURL").value;
-      // save to localStorage
-      localStorage.setItem(keyPhrase, valueLongURL);
-      // add to urlList on the page
-      addUrlToList(keyPhrase, valueLongURL)
-
-      document.getElementById("result").innerHTML = window.location.protocol + "//" + window.location.host + "/" + res.key;
-    } else {
-      document.getElementById("result").innerHTML = res.error;
-    }
-
-    // 弹出消息窗口 Popup the result
-    var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-    modal.show();
-
-  }).catch(function (err) {
-    alert("Unknow error. Please retry!");
-    console.log(err);
-  })
-}
 
 function copyurl(id, attr) {
   let target = null;
@@ -133,16 +84,6 @@ function addUrlToList(shortUrl, longUrl) {
   delBtn.setAttribute('id', 'delBtn-' + shortUrl)
   delBtn.innerText = "X"
   keyItem.appendChild(delBtn)
-
-  // 查询访问次数按钮 Query visit times button
-  let qryCntBtn = document.createElement('button')
-  qryCntBtn.setAttribute('type', 'button')
-  qryCntBtn.classList.add("btn", "btn-info")
-  qryCntBtn.setAttribute('onclick', 'queryVisitCount(\"' + shortUrl + '\")')
-  qryCntBtn.setAttribute('id', 'qryCntBtn-' + shortUrl)
-  qryCntBtn.innerText = "?"
-  keyItem.appendChild(qryCntBtn)
-
   // 短链接信息 Short url
   let keyTxt = document.createElement('span')
   keyTxt.classList.add("form-control", "rounded-bottom-0")
@@ -193,147 +134,19 @@ async function deleteShortUrl(delKeyPhrase) {
   } catch (e) {
     console.log('R2 delete failed:', e);
   }
+  // 从localStorage中删除
+  localStorage.removeItem(delKeyPhrase)
+  loadUrlList()
 
-  // 从KV中删除 Remove item from KV
-  fetch(apiSrv, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cmd: "del", key: delKeyPhrase, password: password_value })
-  }).then(function (response) {
-    return response.json();
-  }).then(function (myJson) {
-    res = myJson;
-
-    // 成功删除 Succeed
-    if (res.status == "200") {
-      // 从localStorage中删除
-      localStorage.removeItem(delKeyPhrase)
-
-      // 加载localStorage
-      loadUrlList()
-
-      document.getElementById("result").innerHTML = "Delete Successful"
-    } else {
-      document.getElementById("result").innerHTML = res.error;
-    }
-
-    // 弹出消息窗口 Popup the result
-    var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-    modal.show();
-
-  }).catch(function (err) {
-    alert("Unknow error. Please retry!");
-    console.log(err);
-  })
+  // 按钮恢复
+  document.getElementById("delBtn-" + delKeyPhrase).disabled = false;
+  document.getElementById("delBtn-" + delKeyPhrase).innerHTML = "X";
 }
 
-function queryVisitCount(qryKeyPhrase) {
-  // 按钮状态 Button Status
-  document.getElementById("qryCntBtn-" + qryKeyPhrase).disabled = true;
-  document.getElementById("qryCntBtn-" + qryKeyPhrase).innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
 
-  // 从KV中查询 Query from KV
-  fetch(apiSrv, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cmd: "qry", key: qryKeyPhrase + "-count", password: password_value })
-  }).then(function (response) {
-    return response.json();
-  }).then(function (myJson) {
-    res = myJson;
 
-    // 成功查询 Succeed
-    if (res.status == "200") {
-      document.getElementById("qryCntBtn-" + qryKeyPhrase).innerHTML = res.url;
-    } else {
-      document.getElementById("result").innerHTML = res.error;
-      // 弹出消息窗口 Popup the result
-      var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-      modal.show();
-    }
-
-  }).catch(function (err) {
-    alert("Unknow error. Please retry!");
-    console.log(err);
-  })
-}
-
-function query1KV() {
-  let qryKeyPhrase = document.getElementById("keyForQuery").value;
-  if (qryKeyPhrase == "") {
-    return
-  }
-
-  // 从KV中查询 Query from KV
-  fetch(apiSrv, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cmd: "qry", key: qryKeyPhrase, password: password_value })
-  }).then(function (response) {
-    return response.json();
-  }).then(function (myJson) {
-    res = myJson;
-
-    // 成功查询 Succeed
-    if (res.status == "200") {
-      document.getElementById("longURL").value = res.url;
-      document.getElementById("keyPhrase").value = qryKeyPhrase;
-      // 触发input事件
-      document.getElementById("longURL").dispatchEvent(new Event('input', {
-        bubbles: true,
-        cancelable: true,
-      }))
-    } else {
-      document.getElementById("result").innerHTML = res.error;
-      // 弹出消息窗口 Popup the result
-      var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-      modal.show();
-    }
-
-  }).catch(function (err) {
-    alert("Unknow error. Please retry!");
-    console.log(err);
-  })
-}
-
-function loadKV() {
-  //清空本地存储
-  clearLocalStorage(); 
-
-  // 从KV中查询, cmd为 "qryall", 查询全部
-  fetch(apiSrv, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cmd: "qryall", password: password_value })
-  }).then(function (response) {    
-    return response.json();
-  }).then(function (myJson) {
-    res = myJson;
-    // 成功查询 Succeed
-    if (res.status == "200") {
-
-      // 遍历kvlist
-      res.kvlist.forEach(item => {      
-        keyPhrase = item.key;
-        valueLongURL = item.value;
-        // save to localStorage
-        localStorage.setItem(keyPhrase, valueLongURL);  
-      });
-
-    } else {
-      document.getElementById("result").innerHTML = res.error;
-      // 弹出消息窗口 Popup the result
-      var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-      modal.show();
-    }
-  }).catch(function (err) {
-    alert("Unknow error. Please retry!");
-    console.log(err);
-  })
-}
-
-// ====== load R2 to KV: 列出 R2 全部文件, 写入 KV ======
-async function loadR2ToKV() {
+// ====== load R2 to localStorage: 列出 R2 全部文件, 写入 localStorage ======
+async function loadR2ToLocalStorage() {
   const cfg = getR2Config();
   if (!cfg.accountId || !cfg.bucketName) {
     alert('R2 配置未就绪');
@@ -364,53 +177,34 @@ async function loadR2ToKV() {
 
     if (keys.length === 0) {
       btn.disabled = false;
-      btn.innerHTML = 'load R2 to KV';
+      btn.innerHTML = 'load R2 to localStorage';
       alert('R2 中没有文件');
       return;
     }
 
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 KV (0/' + keys.length + ')...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 localStorage (0/' + keys.length + ')...';
 
-    // 逐个写入 KV
-    let success = 0;
-    let fail = 0;
+    // 直接写入 localStorage
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const r2Url = cfg.publicUrl + '/' + encodeURIComponent(key);
-
-      try {
-        const result = await fetch(apiSrv, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cmd: "add", url: r2Url, key: key, password: password_value })
-        }).then(r => r.json());
-
-        if (result.status == "200") {
-          success++;
-          // 同步写入 localStorage
-          localStorage.setItem(key, r2Url);
-        } else {
-          fail++;
-        }
-      } catch (e) {
-        fail++;
-      }
+      localStorage.setItem(key, r2Url);
 
       // 更新进度
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 KV (' + (i + 1) + '/' + keys.length + ')...';
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 写入 localStorage (' + (i + 1) + '/' + keys.length + ')...';
     }
 
     btn.disabled = false;
-    btn.innerHTML = 'load R2 to KV';
+    btn.innerHTML = 'load R2 to localStorage';
     loadUrlList(); // 刷新列表
 
-    document.getElementById("result").innerHTML = 'R2 → KV 完成<br>成功: ' + success + '<br>失败: ' + fail;
+    document.getElementById("result").innerHTML = 'R2 → localStorage 完成<br>已加载: ' + keys.length + ' 个文件';
     var modal = new bootstrap.Modal(document.getElementById('resultModal'));
     modal.show();
 
   } catch (err) {
     btn.disabled = false;
-    btn.innerHTML = 'load R2 to KV';
+    btn.innerHTML = 'load R2 to localStorage';
     alert('读取 R2 失败: ' + err.message);
   }
 }
@@ -802,11 +596,15 @@ function uploadFileToR2(file, uploadUrl) {
   xhr.send(file);
 }
 
-// ====== 步骤 3: 上传完成, 填入字段 + 自动保存到 KV ======
+// ====== 步骤 3: 上传完成, 填入字段 + 保存到 localStorage ======
 function onUploadDone(key, r2Url) {
   // 填入结果
   document.getElementById('longURL').value = r2Url;
   document.getElementById('keyPhrase').value = key;
+
+  // 保存到 localStorage
+  localStorage.setItem(key, r2Url);
+  addUrlToList(key, r2Url);
 
   // 进度条变绿
   const progressBar = document.getElementById('progressBar');
@@ -818,32 +616,8 @@ function onUploadDone(key, r2Url) {
 
   // 弹窗显示 R2 URL
   showResult(r2Url);
-
-  // 自动保存到 KV (静默)
-  shorturlSilent();
 }
 
-// ====== 静默保存到 KV (不弹窗) ======
-function shorturlSilent() {
-  if (document.querySelector("#longURL").value == "") return;
-
-  document.getElementById('keyPhrase').value = document.getElementById('keyPhrase').value.replace(/\s/g, "-");
-
-  fetch(apiSrv, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cmd: "add", url: document.querySelector("#longURL").value, key: document.querySelector("#keyPhrase").value, password: password_value })
-  }).then(function (response) {
-    return response.json();
-  }).then(function (myJson) {
-    if (myJson.status == "200") {
-      localStorage.setItem(myJson.key, document.querySelector("#longURL").value);
-      addUrlToList(myJson.key, document.querySelector("#longURL").value);
-    }
-  }).catch(function (err) {
-    console.log(err);
-  });
-}
 
 // ====== 工具函数 ======
 function resetUploadBtn() {
