@@ -1,12 +1,11 @@
-const config = {
-  password: "", // 管理面板使用密码
-  load_r2: true, // 允许 load R2 to localStorage 按钮
-}
-
-// ====== R2 S3 API 配置 (文件保管站 file-r2 模式) ======
+// ====== Worker 配置 ======
 // 以下变量推荐通过 Cloudflare 面板的环境变量(Variables)/加密机密(Secrets)注入, 作为全局变量自动可用
 // 注意: 面板中的变量名必须与代码完全一致(注意大小写敏感)
 // 偷懒也可以直接在这里赋值
+//   WORKER_PASSWORD      = ""    // - 管理面板访问密码
+//   LOAD_R2_BUTTON       = "true" // - 允许 load R2 to localStorage 按钮 (true/false)
+
+// ====== R2 S3 API 配置 (文件保管站 file-r2 模式) ======
 //   R2_S3_ENDPOINT       = "" // - S3 API 完整 URL, 如 https://xxx.r2.cloudflarestorage.com (优先于 R2_ACCOUNT_ID 拼装)
 //   R2_ACCOUNT_ID        = "" // - R2 账户 ID (明文变量) (兼容历史版本, 保留)
 //   R2_ACCESS_KEY_ID     = "" // - S3 API Access Key ID (建议设为加密 Secret)
@@ -21,7 +20,8 @@ const response_header = {
 }
 
 async function handleRequest(request) {
-  const password_value = config.password.trim();
+  const password_value = ((typeof WORKER_PASSWORD !== 'undefined') ? WORKER_PASSWORD : "").trim();
+  const load_r2 = (typeof LOAD_R2_BUTTON !== 'undefined') ? LOAD_R2_BUTTON === 'true' : true;
 
   const requestURL = new URL(request.url)
   let path = requestURL.pathname.split("/")[1]
@@ -47,7 +47,7 @@ async function handleRequest(request) {
     index = index.replace(/__R2_SECRET_ACCESS_KEY__/gm, (typeof R2_SECRET_ACCESS_KEY !== 'undefined') ? R2_SECRET_ACCESS_KEY : '')
     index = index.replace(/__R2_BUCKET_NAME__/gm, (typeof R2_BUCKET_NAME !== 'undefined') ? R2_BUCKET_NAME : '')
     index = index.replace(/__R2_PUBLIC_URL__/gm, (typeof R2_PUBLIC_URL !== 'undefined') ? R2_PUBLIC_URL : '')
-    if (!config.load_r2) {
+    if (!load_r2) {
       index = index.replace(/onclick='loadR2ToLocalStorage\(\)'/gm, "onclick='' disabled")
       index = index.replace(/<\/head>/, '<style>#s3Card{display:none}</style></head>')
     }
