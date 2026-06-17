@@ -17,6 +17,7 @@ body {
   vertical-align: center;
   flex-wrap: wrap;
   align-content: center;
+  overflow-x: hidden;
   min-height: 100vh;
 
   color: #2a2b2c;
