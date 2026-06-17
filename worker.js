@@ -1,7 +1,8 @@
-// ====== Worker 配置 ======
 // 以下变量推荐通过 Cloudflare 面板的环境变量(Variables)/加密机密(Secrets)注入, 作为全局变量自动可用
 // 注意: 面板中的变量名必须与代码完全一致(注意大小写敏感)
 // 偷懒也可以直接在这里赋值
+
+// ====== Worker 配置 ======
 //   WORKER_PASSWORD      = ""    // - 管理面板访问密码
 //   LOAD_R2_BUTTON       = "true" // - 允许 load R2 to localStorage 按钮 (true/false)
 
@@ -15,6 +16,15 @@
 
 let index_html = "https://crazypeace.github.io/file-r2-worker/index.html"
 
+const html404 = `<!DOCTYPE html>
+  <html>
+  <body>
+    <h1>404 Not Found.</h1>
+    <p>The url you visit is not found.</p>
+    <p> <a href="https://github.com/crazypeace/file-r2-worker/" target="_self">Fork me on GitHub</a> </p>
+  </body>
+  </html>`
+
 const response_header = {
   "Content-type": "text/html;charset=UTF-8;application/json",
 }
@@ -27,11 +37,11 @@ async function handleRequest(request) {
   let path = requestURL.pathname.split("/")[1]
   path = decodeURIComponent(path);
 
-  // 如果path为空, 返回提示
+  // 如果path为空, 返回404
   if (!path) {
-    return new Response("File R2 Worker is running.", {
-      headers: { "Content-type": "text/plain;charset=UTF-8" },
-      status: 200
+    return new Response(html404, {
+      headers: response_header,
+      status: 404
     })
   }
 
@@ -57,8 +67,8 @@ async function handleRequest(request) {
   }
 
   // 其他路径返回 404
-  return new Response("404 Not Found", {
-    headers: { "Content-type": "text/plain;charset=UTF-8" },
+  return new Response(html404, {
+    headers: response_header,
     status: 404
   })
 }
