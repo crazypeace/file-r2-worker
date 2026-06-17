@@ -49,7 +49,7 @@ async function handleRequest(request) {
     index = index.replace(/__R2_PUBLIC_URL__/gm, (typeof R2_PUBLIC_URL !== 'undefined') ? R2_PUBLIC_URL : '')
     if (!config.load_r2) {
       index = index.replace(/onclick='loadR2ToLocalStorage\(\)'/gm, "onclick='' disabled")
-      index = index.replace(/<\/head>/, '<style>#s3Guide.closest(".card"){display:none}</style></head>')
+      index = index.replace(/<\/head>/, '<style>#s3Card{display:none}</style></head>')
     }
     return new Response(index, {
       headers: response_header,
