@@ -162,13 +162,24 @@ async function loadR2ToLocalStorage() {
     const resp = await fetch(url);
     const xml = await resp.text();
 
-    // 解析 XML 提取所有 Key
-    const keys = [];
-    const re = /<Key>(.*?)<\/Key>/g;
-    let m;
-    while ((m = re.exec(xml)) !== null) {
-      keys.push(m[1]);
-    }
+    // 用 DOMParser 解析 XML
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'application/xml');
+    const contents = doc.querySelectorAll('Contents');
+
+    const items = [];
+    contents.forEach(c => {
+      const key = c.querySelector('Key')?.textContent;
+      const lastModified = c.querySelector('LastModified')?.textContent;
+      if (key && lastModified) {
+        items.push({ key, lastModified });
+      }
+    });
+
+    // 按上传时间倒序 (新文件在前)
+    items.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+
+    const keys = items.map(i => i.key);
 
     if (keys.length === 0) {
       btn.disabled = false;
@@ -384,13 +395,10 @@ async function r2KeyExists(key) {
   const resp = await fetch(url);
   const xml = await resp.text();
 
-  // 解析 XML 查找精确匹配的 key
-  const keys = [];
-  const re = /<Key>(.*?)<\/Key>/g;
-  let m;
-  while ((m = re.exec(xml)) !== null) {
-    keys.push(m[1]);
-  }
+  // 用 DOMParser 解析 XML 查找精确匹配的 key
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, 'application/xml');
+  const keys = Array.from(doc.querySelectorAll('Key')).map(k => k.textContent);
   return keys.indexOf(key) !== -1;
 }
 
