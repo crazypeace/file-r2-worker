@@ -253,7 +253,23 @@
         img.src = thumbUrl(longUrl);
         img.style.cssText = "max-width:" + IMG_MAX + "px;max-height:" + IMG_MAX + "px;border-radius:6px;cursor:pointer;display:block;";
         img.title = '点击查看原图';
-        img.onerror = function() { img.remove(); };
+        img.onerror = function() {
+          img.remove();
+          var previewBtn = document.createElement('button');
+          previewBtn.className = 'btn btn-sm btn-outline-secondary';
+          previewBtn.innerText = '预览';
+          previewBtn.style.cssText = 'margin-bottom:4px;';
+          previewBtn.onclick = function() {
+            previewBtn.remove();
+            var origImg = document.createElement('img');
+            origImg.src = longUrl;
+            origImg.style.cssText = 'max-width:' + IMG_MAX + 'px;max-height:' + IMG_MAX + 'px;border-radius:6px;cursor:pointer;display:block;';
+            origImg.title = '点击查看原图';
+            origImg.onclick = function() { window.open(longUrl, '_blank'); };
+            wrap.insertBefore(origImg, txt);
+          };
+          wrap.insertBefore(previewBtn, txt);
+        };
         img.onclick = function() { window.open(longUrl, '_blank'); };
         wrap.appendChild(img);
 
