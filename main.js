@@ -56,23 +56,13 @@ function loadUrlList() {
     urlList.removeChild(urlList.firstChild)
   }
 
-  // 收集所有条目并按 lastModified 倒序排列 (新文件在前)
-  const entries = [];
+  // 遍历localStorage (loadR2ToLocalStorage 已按时间倒序写入)
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
-    const v = localStorage.getItem(k);
     if (!k || k === 'password' || k === 'load_r2' || k === 'socks-port' || k === 'http-port') continue;
-    const { url, lastModified } = parseStoredValue(v);
-    entries.push({ key: k, url, lastModified });
-  }
-  entries.sort((a, b) => {
-    if (a.lastModified && b.lastModified) return new Date(b.lastModified) - new Date(a.lastModified);
-    if (a.lastModified) return -1;
-    if (b.lastModified) return 1;
-    return a.key.localeCompare(b.key);
-  });
-  for (const e of entries) {
-    addUrlToList(e.key, e.url);
+    const v = localStorage.getItem(k);
+    const { url } = parseStoredValue(v);
+    addUrlToList(k, url);
   }
 }
 
