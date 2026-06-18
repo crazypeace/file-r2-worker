@@ -1,4 +1,4 @@
-# file-r2-worker
+# 文件保管站 Cloudflare R2对象存储 | File Hosting with Cloudflare R2
 从 https://github.com/crazypeace/Url-Shorten-Worker "传承"而来
 
 # ShareX 上传到 R2 的 S3 存储
